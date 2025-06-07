@@ -4,7 +4,6 @@ WORKDIR /pad_2025_1_2
 
 COPY . .
 
-RUN mkdir -p static/csv static/db
 
 RUN pip install --upgrade pip \
     && pip install -e . \
