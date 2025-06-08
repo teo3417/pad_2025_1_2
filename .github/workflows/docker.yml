@@ -1,0 +1,36 @@
+name: Scraper con Docker + Push a DockerHub
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Paso 1 - Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Paso 2 - Login a DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Paso 3 - Construir imagen y taguear
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/scraper:latest .
+
+      - name: Paso 4 - Subir imagen a DockerHub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/scraper:latest
+
+      - name: Paso 5 - Ejecutar imagen (prueba local en Actions)
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app ${{ secrets.DOCKER_USERNAME }}/scraper:latest
+
+      - name: Paso 6 - Subir CSV como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: libros-scrapeados
+          path: libros_completos.csv
